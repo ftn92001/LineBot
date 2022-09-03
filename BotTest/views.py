@@ -19,9 +19,9 @@ line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 yt_api = settings.GOOGLE_API_KEY
 usd = ['美金', 'USD', 'usd']
-jpy = ['日元', '日幣', 'JPY', 'jpy']
-hkd = ['港元', '港幣', 'HKD', 'hkd']
-krw = ['韓元', 'KRW', 'krw']
+jpy = ['日圓', '日元', '日幣', 'JPY', 'jpy']
+hkd = ['港幣', '港元', '港圓', 'HKD', 'hkd']
+krw = ['韓元', '韓圓', 'KRW', 'krw']
 cny = ['人民幣', 'CNY', 'cny']
  
 
@@ -168,21 +168,26 @@ def get_currency(currency, price):
     match currency:
         case ('usd'):
             for tr in trs:
-                if '美金 (USD)' in tr.find_all('div')[2].text:
+                divs = tr.find_all('div')
+                if len(divs) > 2 and '美金 (USD)' in divs[2].text:
                     return f"{price}美金(USD) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"    
         case ('jpy'):
             for tr in trs:
-                if '日元 (JPY)' in tr.find_all('div')[2].text:
-                    return f"{price}日元(JPY) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
+                divs = tr.find_all('div')
+                if len(divs) > 2 and '日圓 (JPY)' in tr.find_all('div')[2].text:
+                    return f"{price}日圓(JPY) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
         case ('hkd'):
             for tr in trs:
-                if '港幣 (HKD)' in tr.find_all('div')[2].text:
+                divs = tr.find_all('div')
+                if len(divs) > 2 and '港幣 (HKD)' in tr.find_all('div')[2].text:
                     return f"{price}港幣(HKD) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
         case ('krw'):
             for tr in trs:
-                if '韓元 (KRW)' in tr.find_all('div')[2].text:
+                divs = tr.find_all('div')
+                if len(divs) > 2 and '韓元 (KRW)' in tr.find_all('div')[2].text:
                     return f"{price}韓元(KRW) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
         case ('cny'):
             for tr in trs:
-                if '人民幣 (CNY)' in tr.find_all('div')[2].text:
+                divs = tr.find_all('div')
+                if len(divs) > 2 and '人民幣 (CNY)' in tr.find_all('div')[2].text:
                     return f"{price}人民幣(CNY) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
