@@ -62,6 +62,21 @@ def callback(request):
             elif text[:2] in ['!抽', '！抽']:
                 text = random.choice(moneys)
                 moneys.remove(text)
+            elif ['美金', 'USD', 'usd'] in text:
+                price = get_price('usd', text)
+                text = get_currency('usd', price)
+            elif ['日元', '日幣', 'JPY', 'jpy'] in text:
+                price = get_price('jpy', text)
+                text = get_currency('jpy', price)
+            elif ['港元', '港幣', 'HKD', 'hkd'] in text:
+                price = get_price('hkd', text)
+                text = get_currency('hkd', price)
+            elif ['韓元', 'KRW', 'krw'] in text:
+                price = get_price('krw', text)
+                text = get_currency('krw', price)
+            elif ['人民幣', 'CNY', 'cny'] in text:
+                price = get_price('cny', text)
+                text = get_currency('cny', price)
             else:
                 continue
             if not img:
@@ -96,3 +111,73 @@ def get_video(str):
     data = response.json()
     v = data['items'][0]['id']['videoId']
     return f'https://www.youtube.com/watch?v={v}'
+
+def get_price(currency, text):
+    match currency:
+        case ('usd'):
+            for i in ['美金', 'USD']:
+                text.replace(i, 'usd')
+            rindex = text.index('usd')
+            i = rindex - 1
+            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+                i -= 1
+            return float(text[i + 1:rindex])
+        case ('jpy'):
+            for i in ['日元', '日幣', 'JPY']:
+                text.replace(i, 'jpy')
+            rindex = text.index('jpy')
+            i = rindex - 1
+            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+                i -= 1
+            return float(text[i + 1:rindex])
+        case ('hkd'):
+            for i in ['港元', '港幣', 'HKD']:
+                text.replace(i, 'hkd')
+            rindex = text.index('hkd')
+            i = rindex - 1
+            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+                i -= 1
+            return float(text[i + 1:rindex])
+        case ('krw'):
+            for i in ['韓元', 'KRW']:
+                text.replace(i, 'krw')
+            rindex = text.index('krw')
+            i = rindex - 1
+            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+                i -= 1
+            return float(text[i + 1:rindex])
+        case ('cny'):
+            for i in ['人民幣', 'CNY']:
+                text.replace(i, 'cny')
+            rindex = text.index('cny')
+            i = rindex - 1
+            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+                i -= 1
+            return float(text[i + 1:rindex])
+        
+def get_currency(currency, price):
+    url = 'https://rate.bot.com.tw/xrt?Lang=zh-TW'
+    response = req.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    trs = soup.find_all('tr')
+    match currency:
+        case ('usd'):
+            for tr in trs:
+                if '美金 (USD)' in tr.find_all('div')[2].text:
+                    return f"{price}美金(USD) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"    
+        case ('jpy'):
+            for tr in trs:
+                if '日元 (JPY)' in tr.find_all('div')[2].text:
+                    return f"{price}日元(JPY) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
+        case ('hkd'):
+            for tr in trs:
+                if '港幣 (HKD)' in tr.find_all('div')[2].text:
+                    return f"{price}港幣(HKD) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
+        case ('krw'):
+            for tr in trs:
+                if '韓元 (KRW)' in tr.find_all('div')[2].text:
+                    return f"{price}韓元(KRW) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
+        case ('cny'):
+            for tr in trs:
+                if '人民幣 (CNY)' in tr.find_all('div')[2].text:
+                    return f"{price}人民幣(CNY) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
