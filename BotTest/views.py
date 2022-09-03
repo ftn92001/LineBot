@@ -170,24 +170,24 @@ def get_currency(currency, price):
             for tr in trs:
                 divs = tr.find_all('div')
                 if len(divs) > 2 and '美金 (USD)' in divs[2].text:
-                    return f"{price}美金(USD) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"    
+                    return f"{price}美金(USD) = {price * float(divs[2].text)} 新台幣(TWD)"    
         case ('jpy'):
             for tr in trs:
                 divs = tr.find_all('div')
                 if len(divs) > 2 and '日圓 (JPY)' in tr.find_all('div')[2].text:
-                    return f"{price}日圓(JPY) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
+                    return f"{price}日圓(JPY) = {price * float(divs[2].text)} 新台幣(TWD)"
         case ('hkd'):
             for tr in trs:
                 divs = tr.find_all('div')
                 if len(divs) > 2 and '港幣 (HKD)' in tr.find_all('div')[2].text:
-                    return f"{price}港幣(HKD) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
+                    return f"{price}港幣(HKD) = {price * float(divs[2].text)} 新台幣(TWD)"
         case ('krw'):
             for tr in trs:
                 divs = tr.find_all('div')
                 if len(divs) > 2 and '韓元 (KRW)' in tr.find_all('div')[2].text:
-                    return f"{price}韓元(KRW) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
+                    return f"{price}韓元(KRW) = {price * float(divs[2].text)} 新台幣(TWD)"
         case ('cny'):
             for tr in trs:
                 divs = tr.find_all('div')
                 if len(divs) > 2 and '人民幣 (CNY)' in tr.find_all('div')[2].text:
-                    return f"{price}人民幣(CNY) = {price * float(tr.find_all('td')[2])} 新台幣(TWD)"
+                    return f"{price}人民幣(CNY) = {price * float(divs[2].text)} 新台幣(TWD)"
