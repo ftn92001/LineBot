@@ -18,6 +18,11 @@ import random
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 yt_api = settings.GOOGLE_API_KEY
+usd = ['美金', 'USD', 'usd']
+jpy = ['日元', '日幣', 'JPY', 'jpy']
+hkd = ['港元', '港幣', 'HKD', 'hkd']
+krw = ['韓元', 'KRW', 'krw']
+cny = ['人民幣', 'CNY', 'cny']
  
 
 @csrf_exempt
@@ -62,19 +67,19 @@ def callback(request):
             elif text[:2] in ['!抽', '！抽']:
                 text = random.choice(moneys)
                 moneys.remove(text)
-            elif ['美金', 'USD', 'usd'] in text:
+            elif any(currency in text for currency in usd):
                 price = get_price('usd', text)
                 text = get_currency('usd', price)
-            elif ['日元', '日幣', 'JPY', 'jpy'] in text:
+            elif any(currency in text for currency in jpy):
                 price = get_price('jpy', text)
                 text = get_currency('jpy', price)
-            elif ['港元', '港幣', 'HKD', 'hkd'] in text:
+            elif any(currency in text for currency in hkd):
                 price = get_price('hkd', text)
                 text = get_currency('hkd', price)
-            elif ['韓元', 'KRW', 'krw'] in text:
+            elif any(currency in text for currency in krw):
                 price = get_price('krw', text)
                 text = get_currency('krw', price)
-            elif ['人民幣', 'CNY', 'cny'] in text:
+            elif any(currency in text for currency in cny):
                 price = get_price('cny', text)
                 text = get_currency('cny', price)
             else:
@@ -115,7 +120,7 @@ def get_video(str):
 def get_price(currency, text):
     match currency:
         case ('usd'):
-            for i in ['美金', 'USD']:
+            for i in usd:
                 text.replace(i, 'usd')
             rindex = text.index('usd')
             i = rindex - 1
@@ -123,7 +128,7 @@ def get_price(currency, text):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('jpy'):
-            for i in ['日元', '日幣', 'JPY']:
+            for i in jpy:
                 text.replace(i, 'jpy')
             rindex = text.index('jpy')
             i = rindex - 1
@@ -131,7 +136,7 @@ def get_price(currency, text):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('hkd'):
-            for i in ['港元', '港幣', 'HKD']:
+            for i in hkd:
                 text.replace(i, 'hkd')
             rindex = text.index('hkd')
             i = rindex - 1
@@ -139,7 +144,7 @@ def get_price(currency, text):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('krw'):
-            for i in ['韓元', 'KRW']:
+            for i in krw:
                 text.replace(i, 'krw')
             rindex = text.index('krw')
             i = rindex - 1
@@ -147,7 +152,7 @@ def get_price(currency, text):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('cny'):
-            for i in ['人民幣', 'CNY']:
+            for i in cny:
                 text.replace(i, 'cny')
             rindex = text.index('cny')
             i = rindex - 1
