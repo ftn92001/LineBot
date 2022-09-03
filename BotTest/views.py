@@ -121,40 +121,40 @@ def get_price(currency, text):
     match currency:
         case ('usd'):
             for i in usd:
-                text.replace(i, 'usd')
-            rindex = text.index('usd')
+                text = text.replace(i, 'usd')
+            rindex = text.find('usd')
             i = rindex - 1
             while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('jpy'):
             for i in jpy:
-                text.replace(i, 'jpy')
-            rindex = text.index('jpy')
+                text = text.replace(i, 'jpy')
+            rindex = text.find('jpy')
             i = rindex - 1
             while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('hkd'):
             for i in hkd:
-                text.replace(i, 'hkd')
-            rindex = text.index('hkd')
+                text = text.replace(i, 'hkd')
+            rindex = text.find('hkd')
             i = rindex - 1
             while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('krw'):
             for i in krw:
-                text.replace(i, 'krw')
-            rindex = text.index('krw')
+                text = text.replace(i, 'krw')
+            rindex = text.find('krw')
             i = rindex - 1
             while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('cny'):
             for i in cny:
-                text.replace(i, 'cny')
-            rindex = text.index('cny')
+                text = text.replace(i, 'cny')
+            rindex = text.find('cny')
             i = rindex - 1
             while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
