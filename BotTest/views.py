@@ -119,7 +119,7 @@ def get_price(currency, text):
                 text.replace(i, 'usd')
             rindex = text.index('usd')
             i = rindex - 1
-            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+            while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('jpy'):
@@ -127,7 +127,7 @@ def get_price(currency, text):
                 text.replace(i, 'jpy')
             rindex = text.index('jpy')
             i = rindex - 1
-            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+            while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('hkd'):
@@ -135,7 +135,7 @@ def get_price(currency, text):
                 text.replace(i, 'hkd')
             rindex = text.index('hkd')
             i = rindex - 1
-            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+            while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('krw'):
@@ -143,7 +143,7 @@ def get_price(currency, text):
                 text.replace(i, 'krw')
             rindex = text.index('krw')
             i = rindex - 1
-            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+            while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
             return float(text[i + 1:rindex])
         case ('cny'):
@@ -151,7 +151,7 @@ def get_price(currency, text):
                 text.replace(i, 'cny')
             rindex = text.index('cny')
             i = rindex - 1
-            while (not (text[i: rindex].is_digit() or text[i] == '.')):
+            while ((text[i: rindex].is_digit() or text[i] == '.') and i >= 0):
                 i -= 1
             return float(text[i + 1:rindex])
         
