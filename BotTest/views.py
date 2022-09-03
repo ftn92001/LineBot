@@ -123,40 +123,55 @@ def get_price(currency, text):
             for i in usd:
                 text = text.replace(i, 'usd')
             rindex = text.find('usd')
+            dot_index = -1
             i = rindex - 1
-            while ((text[i: rindex].isdigit() or text[i] == '.') and i >= 0):
+            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
+                if text[i] == '.':
+                    dot_index = i
                 i -= 1
             return float(text[i:rindex])
         case ('jpy'):
             for i in jpy:
                 text = text.replace(i, 'jpy')
             rindex = text.find('jpy')
+            dot_index = -1
             i = rindex - 1
-            while ((text[i: rindex].isdigit() or text[i] == '.') and i >= 0):
+            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
+                if text[i] == '.':
+                    dot_index = i
                 i -= 1
             return float(text[i:rindex])
         case ('hkd'):
             for i in hkd:
                 text = text.replace(i, 'hkd')
             rindex = text.find('hkd')
+            dot_index = -1
             i = rindex - 1
-            while ((text[i: rindex].isdigit() or text[i] == '.') and i >= 0):
+            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
+                if text[i] == '.':
+                    dot_index = i
                 i -= 1
             return float(text[i:rindex])
         case ('krw'):
             for i in krw:
                 text = text.replace(i, 'krw')
             rindex = text.find('krw')
+            dot_index = -1
             i = rindex - 1
-            while ((text[i: rindex].isdigit() or text[i] == '.') and i >= 0):
+            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
+                if text[i] == '.':
+                    dot_index = i
                 i -= 1
             return float(text[i:rindex])
         case ('cny'):
             for i in cny:
                 text = text.replace(i, 'cny')
             rindex = text.find('cny')
+            dot_index = -1
             i = rindex - 1
-            while ((text[i: rindex].isdigit() or text[i] == '.') and i >= 0):
+            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
+                if text[i] == '.':
+                    dot_index = i
                 i -= 1
             return float(text[i:rindex])
         
