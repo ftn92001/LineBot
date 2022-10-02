@@ -1,3 +1,6 @@
 users_id.txt
 app_config.txt
 db.sqlite3
+app.yaml
+.gcloudignore
+__pycache__
