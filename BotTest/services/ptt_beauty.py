@@ -1,15 +1,10 @@
 import random
-from .models import Photo
+from ..models import Photo
 
-def get_beauty_img():
-    pk = random.randint(0, Photo.objects.count() - 1)
-    photo = Photo.objects.get(pk=pk)
-    return photo.image_src, photo.name
-
-def get_beauty_imgs():
+def get_beauty_imgs(amount):
     imgs = []
     texts = []
-    for _ in range(10):
+    for _ in range(amount):
         pk = random.randint(0, Photo.objects.count() - 1)
         photo = Photo.objects.get(pk=pk)
         imgs.append(photo.image_src)

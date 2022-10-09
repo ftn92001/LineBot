@@ -11,8 +11,11 @@ from googletrans import Translator
 import requests as req
 from bs4 import BeautifulSoup
 import random
+import datetime
 
-from .ptt_beauty import get_beauty_img, get_beauty_imgs
+from .services.ptt_beauty import get_beauty_imgs
+from .services.user_money import raise_money, reduce_money
+from .models import LineUser, DailyAttendance
 
 # Create your views here.
  
@@ -26,10 +29,10 @@ krw = ['韓元', '韓圓', 'KRW', 'krw']
 cny = ['人民幣', 'CNY', 'cny']
  
 def home_view(request):
-    image_src, image_name = get_beauty_img()
+    image_src, image_name = get_beauty_imgs(1)
     return render(request, "index.html", {
         "image_src": image_src,
-        "image_name": image_name
+        "image_name": image_name,
     })
 
 @csrf_exempt
@@ -47,63 +50,88 @@ def callback(request):
     for event in events:
         if isinstance(event, MessageEvent):
             text = event.message.text # 傳進來的訊息
-            img = None
-            imgs = None
-            texts = None
+            imgs = []
+            texts = []
             source_user = event.source.user_id
             #source_group = event.source.group_id
             print(source_user)
             #print(source_group)
-            if text[:3] in ['!正妹', '！正妹']:
-                img, text = get_beauty_img()
-            elif text[:5] in ['!抽女朋友', '！抽女朋友']:
-                img, text = get_beauty_img()
+            user = LineUser.objects.get_or_create(line_id = source_user, defaults={"line_id": source_user, "money": 0})[0]
+            if text[:3] in ['!簽到', '！簽到']:
+                daily_attendance = user.daily_attendance
+                last_daily_attendance = daily_attendance.latest('id').time if daily_attendance.exists() else None
+                if  last_daily_attendance is None or last_daily_attendance.date() != datetime.date.today():
+                    DailyAttendance.objects.create(line_user = user)
+                    raise_money(user, 50)
+                    texts = [f"成功簽到，你有{user.money}顆石頭"]
+                else:
+                    texts = ['今天已經簽到過了']
+            elif text[:3] in ['!石頭', '！石頭']:
+                texts = [f"你還有{user.money}顆石頭"]
+            elif text[:3] in ['!正妹', '！正妹'] or text[:5] in ['!抽女朋友', '！抽女朋友']:
+                if user.money >= 1:
+                    imgs, texts = get_beauty_imgs(1)
+                    reduce_money(user, 1)
+                else:
+                    texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
             elif text[:4] in ['!十連抽', '！十連抽']:
-                imgs, texts = get_beauty_imgs()
-                text = None
+                if user.money >= 10:
+                    imgs, texts = get_beauty_imgs(10)
+                    reduce_money(user, 10)
+                else:
+                    texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
+            elif text[:3] in ['!北捷', '！北捷']:
+                imgs = ['https://web.metro.taipei/pages/assets/images/routemap2020.png']
+            elif text[:3] in ['!中捷', '！中捷']:
+                imgs = ['https://www.tmrt.com.tw/static/img/metro-life/map/map.jpg']
+            elif text[:3] in ['!高捷', '！高捷']:
+                imgs = ['https://www.krtc.com.tw/Content/userfiles/images/guide-map.jpg?v=c24_1']
             elif text[:2] in ['!p', '！p', '!P', '！P']:
-                img = get_image(text[2:])
-                text = None
+                imgs = [get_image(text[2:])]
             elif text[:3].lower() in ['!yt', '！yt']:
-                text = get_video(text[3:])
+                texts = [get_video(text[3:])]
             elif text[:2] == '@中':
-                text = translation(text[2:], 'zh-tw')
+                texts = [translation(text[2:], 'zh-tw')]
             elif text[:2] == '@英':
-                text = translation(text[2:], 'en')
+                texts = [translation(text[2:], 'en')]
             elif text[:2] == '@日':
-                text = translation(text[2:], 'ja')
+                texts = [translation(text[2:], 'ja')]
             elif text[:2] == '@韓':
-                text = translation(text[2:], 'ko')
+                texts = [translation(text[2:], 'ko')]
             elif text[:3] in ['!遊戲', '！遊戲']:
                 # !遊戲 3000 200 10 5
                 #   0    1   2   3  4
                 global moneys
                 moneys = text.split(' ')
                 moneys = moneys[1:]
-                text = '輸入"!抽"進行'
+                texts = ['輸入"!抽"進行']
             elif text[:2] in ['!抽', '！抽']:
-                text = random.choice(moneys)
-                moneys.remove(text)
+                if moneys:
+                    text = random.choice(moneys)
+                    moneys.remove(text)
+                else:
+                    text = '已抽完，輸入"!遊戲 xx xx"重新進行'
+                texts = [text]
             elif any(currency in text for currency in usd):
                 price = get_price('usd', text)
-                text = get_currency('usd', price)
+                texts = [get_currency('usd', price)]
             elif any(currency in text for currency in jpy):
                 price = get_price('jpy', text)
-                text = get_currency('jpy', price)
+                texts = [get_currency('jpy', price)]
             elif any(currency in text for currency in hkd):
                 price = get_price('hkd', text)
-                text = get_currency('hkd', price)
+                texts = [get_currency('hkd', price)]
             elif any(currency in text for currency in krw):
                 price = get_price('krw', text)
-                text = get_currency('krw', price)
+                texts = [get_currency('krw', price)]
             elif any(currency in text for currency in cny):
                 price = get_price('cny', text)
-                text = get_currency('cny', price)
+                texts = [get_currency('cny', price)]
             else:
                 continue
-            if imgs:
+            
+            if len(imgs) == 10 and len(texts) == 10:
                 # 回復多張圖片
-                print(imgs)
                 image_carousel_template_message = TemplateSendMessage(
                     alt_text='ImageCarousel template',
                     template=ImageCarouselTemplate(
@@ -182,19 +210,15 @@ def callback(request):
                     )
                 )
                 line_bot_api.reply_message(event.reply_token, image_carousel_template_message)
-            elif img and text:
-                print(img, text)
-                # 回復圖片和文字
-                line_bot_api.reply_message(event.reply_token, [
-                    ImageSendMessage(original_content_url = img, preview_image_url = img),
-                    TextSendMessage(text = text)
-                ])
-            elif img:
-                # 回復圖片 ， original_content_url='要傳的圖片' preview_image_url='要傳的圖片預覽'
-                line_bot_api.reply_message(event.reply_token, ImageSendMessage(original_content_url = img, preview_image_url = img))
             else:
+                msgs = []
+                # 回復圖片 ， original_content_url='要傳的圖片' preview_image_url='要傳的圖片預覽'
+                if imgs:
+                    msgs.extend(ImageSendMessage(original_content_url=img, preview_image_url=img) for img in imgs)
                 # 回復文字 ， text='要傳的訊息'
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text = text))
+                if texts:
+                    msgs.extend(TextSendMessage(text = text) for text in texts)
+                line_bot_api.reply_message(event.reply_token, msgs)
     return HttpResponse()
 
 def translation(text, dest):
