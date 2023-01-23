@@ -27,14 +27,14 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY', default=env('SECRET_KEY'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = 'RENDER' not in os.environ
 DEBUG = True
 
 ALLOWED_HOSTS = []
-if RENDER_EXTERNAL_HOSTNAME := env('RENDER_EXTERNAL_HOSTNAME'):
+if RENDER_EXTERNAL_HOSTNAME := os.environ.get('RENDER_EXTERNAL_HOSTNAME', default=env('RENDER_EXTERNAL_HOSTNAME')):
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
@@ -89,10 +89,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'LineBot',
-        'HOST': env('MYSQL_HOST'),
+        'HOST': os.environ.get('MYSQL_HOST', default=env('MYSQL_HOST')),
         'PORT': 3306,
-        'USER': env('MYSQL_USER'),
-        'PASSWORD': env('MYSQL_PASSWORD')
+        'USER': os.environ.get('MYSQL_USER', default=env('MYSQL_USER')),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', default=env('MYSQL_PASSWORD'))
     }
 }
 
@@ -137,11 +137,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 
 # LINE BOT SECRET
-LINE_CHANNEL_ACCESS_TOKEN = env('LINE_CHANNEL_ACCESS_TOKEN')
-LINE_CHANNEL_SECRET = env('LINE_CHANNEL_SECRET')
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN', default=env('LINE_CHANNEL_ACCESS_TOKEN'))
+LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET', default=env('LINE_CHANNEL_SECRET'))
 
 # Google API
-GOOGLE_API_KEY = env('GOOGLE_API_KEY')
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY', default=env('GOOGLE_API_KEY'))
 
 # Weather API
-WEATHER_API_KEY = env('WEATHER_API_KEY')
+WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY', default=env('WEATHER_API_KEY'))

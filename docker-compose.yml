@@ -1,0 +1,19 @@
+version: '3'
+services:
+  line_bot:
+    build: .
+    ports:
+     - 8000:8000
+    command: sh -c "
+      sleep 20 &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - mysql
+  mysql:
+      image: mysql
+      ports:
+       - 3306:3306
+      environment:
+       - MYSQL_ROOT_PASSWORD=password
+       - MYSQL_DATABASE=LineBot
