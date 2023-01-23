@@ -5,7 +5,7 @@ from django.conf import settings
  
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextSendMessage, ImageSendMessage, TemplateSendMessage, ImageCarouselTemplate, ImageCarouselColumn, MessageAction
+from linebot.models import MessageEvent, TextSendMessage, ImageSendMessage, TemplateSendMessage, ImageCarouselTemplate, ImageCarouselColumn, MessageAction, FlexSendMessage
 
 from googletrans import Translator
 import requests as req
@@ -13,12 +13,14 @@ from bs4 import BeautifulSoup
 import random
 import datetime
 
-from .services.ptt_beauty import get_beauty_imgs
+from .services.ptt_beauty import get_beauty_imgs, get_someone_beauty_imgs, beauty_template_message
 from .services.user_money import raise_money, reduce_money
+from .services.weather import get_today_weather, weather_template_message
+from .services.whitecat_wiki import character_info_template_message
+from .services.line_bot import push_morning_messages
 from .models import LineUser, DailyAttendance
 
 # Create your views here.
- 
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 yt_api = settings.GOOGLE_API_KEY
@@ -29,10 +31,9 @@ krw = ['韓元', '韓圓', 'KRW', 'krw']
 cny = ['人民幣', 'CNY', 'cny']
  
 def home_view(request):
-    image_src, image_name = get_beauty_imgs(1)
+    image_src, image_name, urls = get_beauty_imgs(1)
     return render(request, "index.html", {
-        "image_src": image_src,
-        "image_name": image_name,
+        "images": zip(image_src, image_name, urls),
     })
 
 @csrf_exempt
@@ -53,11 +54,19 @@ def callback(request):
             imgs = []
             texts = []
             source_user = event.source.user_id
-            #source_group = event.source.group_id
+            source_group = event.source.group_id if hasattr(event.source, 'group_id') else None
             print(source_user)
-            #print(source_group)
+            print(source_group)
             user = LineUser.objects.get_or_create(line_id = source_user, defaults={"line_id": source_user, "money": 0})[0]
-            if text[:3] in ['!簽到', '！簽到']:
+            if text[:3] in ['!指令', '！指令']:
+                texts.append('!指令\n!白貓\n!天氣\n!簽到\n!石頭\n!抽女朋友\n!十連抽\n!北(中高)捷\n!p搜圖\n!yt搜影片\n@中英日韓翻譯\n!遊戲\n!抽\n美日韓港人民幣換算')
+            elif text[:3] in ['!白貓', '！白貓']:
+                line_bot_api.reply_message(event.reply_token, character_info_template_message())
+                return HttpResponse()
+            elif text[:3] in ['!天氣', '！天氣']:
+                line_bot_api.reply_message(event.reply_token, weather_template_message(get_today_weather()))
+                return HttpResponse()
+            elif text[:3] in ['!簽到', '！簽到']:
                 daily_attendance = user.daily_attendance
                 last_daily_attendance = daily_attendance.latest('id').time if daily_attendance.exists() else None
                 if  last_daily_attendance is None or last_daily_attendance.date() != datetime.date.today():
@@ -68,18 +77,45 @@ def callback(request):
                     texts = ['今天已經簽到過了']
             elif text[:3] in ['!石頭', '！石頭']:
                 texts = [f"你還有{user.money}顆石頭"]
-            elif text[:3] in ['!正妹', '！正妹'] or text[:5] in ['!抽女朋友', '！抽女朋友']:
-                if user.money >= 1:
-                    imgs, texts = get_beauty_imgs(1)
+            elif text[:3] in ['!正妹', '！正妹']:
+                if user.money >= 1 and (len(text) == 3 or text[3] not in [':', '：']):
+                    imgs, texts, urls = get_beauty_imgs(1)
+                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
                     reduce_money(user, 1)
+                elif user.money >= 2 and text[3] in [':', '：']:
+                    imgs, texts, urls = get_someone_beauty_imgs(1, text[4:])
+                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                    if imgs and texts: 
+                        reduce_money(user, 2)
                 else:
                     texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
+                return HttpResponse()
+            elif text[:5] in ['!抽女朋友', '！抽女朋友']:
+                if user.money >= 1 and (len(text) == 5 or text[5] not in [':', '：']):
+                    imgs, texts, urls = get_beauty_imgs(1)
+                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                    reduce_money(user, 1)
+                elif user.money >= 2 and text[5] in [':', '：']:
+                    imgs, texts, urls = get_someone_beauty_imgs(1, text[6:])
+                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                    if imgs and texts: 
+                        reduce_money(user, 2)
+                else:
+                    texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
+                return HttpResponse()
             elif text[:4] in ['!十連抽', '！十連抽']:
-                if user.money >= 10:
-                    imgs, texts = get_beauty_imgs(10)
+                if user.money >= 10 and (len(text) == 4 or text[4] not in [':', '：']):
+                    imgs, texts, urls = get_beauty_imgs(11)
+                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
                     reduce_money(user, 10)
+                elif user.money >= 20 and text[4] in [':', '：']:
+                    imgs, texts, urls = get_someone_beauty_imgs(11, text[5:])
+                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                    if imgs and texts:
+                        reduce_money(user, 20)
                 else:
                     texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
+                return HttpResponse()
             elif text[:3] in ['!北捷', '！北捷']:
                 imgs = ['https://web.metro.taipei/pages/assets/images/routemap2020.png']
             elif text[:3] in ['!中捷', '！中捷']:
@@ -130,95 +166,23 @@ def callback(request):
             else:
                 continue
             
-            if len(imgs) == 10 and len(texts) == 10:
-                # 回復多張圖片
-                image_carousel_template_message = TemplateSendMessage(
-                    alt_text='ImageCarousel template',
-                    template=ImageCarouselTemplate(
-                        columns=[
-                            ImageCarouselColumn(
-                                image_url=imgs[0],
-                                action=MessageAction(
-                                    label='1',
-                                    text=f"1.{texts[0]}"
-                                ),
-                            ),
-                            ImageCarouselColumn(
-                                image_url=imgs[1],
-                                action=MessageAction(
-                                    label='2',
-                                    text=f"2.{texts[1]}"
-                                ),
-                            ),
-                            ImageCarouselColumn(
-                                image_url=imgs[2],
-                                action=MessageAction(
-                                    label='3',
-                                    text=f"3.{texts[2]}"
-                                ),
-                            ),
-                            ImageCarouselColumn(
-                                image_url=imgs[3],
-                                action=MessageAction(
-                                    label='4',
-                                    text=f"4.{texts[3]}"
-                                ),
-                            ),
-                            ImageCarouselColumn(
-                                image_url=imgs[4],
-                                action=MessageAction(
-                                    label='5',
-                                    text=f"5.{texts[4]}"
-                                ),
-                            ),
-                            ImageCarouselColumn(
-                                image_url=imgs[5],
-                                action=MessageAction(
-                                    label='6',
-                                    text=f"6.{texts[5]}"
-                                ),
-                            ),
-                            ImageCarouselColumn(
-                                image_url=imgs[6],
-                                action=MessageAction(
-                                    label='7',
-                                    text=f"7.{texts[6]}"
-                                ),
-                            ),
-                            ImageCarouselColumn(
-                                image_url=imgs[7],
-                                action=MessageAction(
-                                    label='8',
-                                    text=f"8.{texts[7]}"
-                                ),
-                            ),
-                            ImageCarouselColumn(
-                                image_url=imgs[8],
-                                action=MessageAction(
-                                    label='9',
-                                    text=f"9.{texts[8]}"
-                                ),
-                            ),
-                            ImageCarouselColumn(
-                                image_url=imgs[9],
-                                action=MessageAction(
-                                    label='10',
-                                    text=f"10.{texts[9]}"
-                                ),
-                            )
-                        ]
-                    )
-                )
-                line_bot_api.reply_message(event.reply_token, image_carousel_template_message)
-            else:
-                msgs = []
-                # 回復圖片 ， original_content_url='要傳的圖片' preview_image_url='要傳的圖片預覽'
-                if imgs:
-                    msgs.extend(ImageSendMessage(original_content_url=img, preview_image_url=img) for img in imgs)
-                # 回復文字 ， text='要傳的訊息'
-                if texts:
-                    msgs.extend(TextSendMessage(text = text) for text in texts)
-                line_bot_api.reply_message(event.reply_token, msgs)
+            msgs = []
+            # 回復圖片 ， original_content_url='要傳的圖片' preview_image_url='要傳的圖片預覽'
+            if imgs:
+                msgs.extend(ImageSendMessage(original_content_url=img, preview_image_url=img) for img in imgs)
+            # 回復文字 ， text='要傳的訊息'
+            if texts:
+                msgs.extend(TextSendMessage(text = text) for text in texts)
+            msgs = msgs[:5]
+            line_bot_api.reply_message(event.reply_token, msgs)
+    return HttpResponse()
+
+@csrf_exempt
+def push_morning_message(request):
+    if request.method != 'POST':
+        return HttpResponseBadRequest()
+    user_id = 'C2465b9bf8ce854820433f2e83cb50e85'
+    push_morning_messages(user_id)
     return HttpResponse()
 
 def translation(text, dest):

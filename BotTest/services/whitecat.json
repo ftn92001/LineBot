@@ -1,0 +1,62 @@
+{
+    "type": "carousel",
+    "contents": [
+      {
+        "type": "bubble",
+        "size": "micro",
+        "body": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "text",
+              "text": "SPY×FAMILY 間諜家家酒",
+              "weight": "bold",
+              "size": "lg",
+              "wrap": true
+            },
+            {
+              "type": "text",
+              "text": "2022年 10/11~10/25",
+              "size": "sm"
+            },
+            {
+              "type": "box",
+              "layout": "baseline",
+              "contents": [
+                {
+                  "type": "icon",
+                  "size": "5xl",
+                  "url": "https://static.wikia.nocookie.net/shironekoproject/images/b/b6/%E6%B4%9B%E4%BC%8A%E5%BE%B7s.png/revision/latest/scale-to-width-down/60?cb=20221016111921&path-prefix=zh"
+                }
+              ],
+              "justifyContent": "center",
+              "action": {
+                "type": "uri",
+                "label": "action",
+                "uri": "https://shironekoproject.fandom.com/zh/wiki/%E6%B4%9B%E4%BC%8A%E5%BE%B7"
+              }
+            },
+            {
+              "type": "box",
+              "layout": "baseline",
+              "contents": [
+                {
+                  "type": "text",
+                  "text": "洛伊德",
+                  "size": "md",
+                  "color": "#8c8c8c",
+                  "margin": "none",
+                  "flex": 0
+                }
+              ],
+              "justifyContent": "center"
+            }
+          ],
+          "spacing": "sm",
+          "paddingAll": "13px"
+        }
+      }
+    ]
+  }
+  

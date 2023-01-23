@@ -1,0 +1,54 @@
+{
+    "type": "carousel",
+    "contents": [
+      {
+        "type": "bubble",
+        "body": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "image",
+              "url": "https://i.imgur.com/trnVpSt.jpg",
+              "size": "full",
+              "aspectMode": "cover",
+              "aspectRatio": "2:3",
+              "gravity": "top"
+            },
+            {
+              "type": "box",
+              "layout": "vertical",
+              "contents": [
+                {
+                  "type": "box",
+                  "layout": "vertical",
+                  "contents": [
+                    {
+                      "type": "text",
+                      "text": "查無文章",
+                      "size": "sm",
+                      "color": "#ffffff",
+                      "weight": "bold"
+                    }
+                  ]
+                }
+              ],
+              "position": "absolute",
+              "offsetBottom": "0px",
+              "offsetStart": "0px",
+              "offsetEnd": "0px",
+              "backgroundColor": "#03303Acc",
+              "paddingAll": "20px",
+              "paddingTop": "18px"
+            }
+          ],
+          "paddingAll": "0px"
+        },
+        "action": {
+          "type": "uri",
+          "label": "action",
+          "uri": "https://www.ptt.cc/bbs/Beauty/index.html"
+        }
+      }
+    ]
+  }

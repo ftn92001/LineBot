@@ -9,6 +9,7 @@ class LineUser(models.Model):
 class Photo(models.Model):
     image_src = models.URLField()
     name = models.CharField(max_length=255, default='')
+    url = models.URLField(blank=True)
 
 class DailyAttendance(models.Model):
     time = models.DateTimeField(auto_now_add=True)

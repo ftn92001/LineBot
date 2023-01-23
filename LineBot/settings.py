@@ -136,3 +136,6 @@ LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET')
 
 # Google API
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+
+# Weather API
+WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY')

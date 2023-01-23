@@ -8,7 +8,9 @@
 </head>
 <body>
     <h1>隨機圖</h1>
-    <h3>{{image_name.0}}</h3>
-    <img src={{image_src.0}} alt="{{image_name.0}}">
+    {% for src, name, url in images %}
+        <a href="{{ url }}"><h3>{{ name }}</h3></a>
+        <img src="{{ src }}" alt="{{ name }}">
+    {% endfor %}
 </body>
 </html>
