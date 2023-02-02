@@ -3,8 +3,9 @@ from bs4 import BeautifulSoup
 import json
 from copy import deepcopy
 from linebot.models import FlexSendMessage
+from django_redis import get_redis_connection
 
-def character_info():
+def character_info(con):
     url  = "https://shironekoproject.fandom.com/zh/wiki/%E4%BE%9D%E7%99%BB%E5%A0%B4%E6%99%82%E9%96%93"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -37,8 +38,11 @@ def character_info():
             content[2*(j+1)]['action']['uri'] = uri
             content[2*(j+1)]['contents'][0]['url'] = src
             content[2*(j+1)+1]['contents'][0]['text'] = name
+    con.set("white_cat", json.dumps(file))
+    con.expire("white_cat", 60 * 10)
     return file
 
 def character_info_template_message():
-    message = character_info()
+    con = get_redis_connection("default")
+    message = json.loads(con.get("white_cat")) if con.exists("white_cat") else character_info(con)
     return FlexSendMessage(alt_text='白貓角色資訊', contents=message)

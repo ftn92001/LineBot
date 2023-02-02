@@ -81,6 +81,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LineBot.wsgi.application'
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.environ.get('REDIS_LOCATION', default=env('REDIS_LOCATION')),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": os.environ.get('REDIS_PASSWORD', default=env('REDIS_PASSWORD'))
+        },
+        "KEY_PREFIX": "Cache"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
