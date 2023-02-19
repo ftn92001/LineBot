@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django_redis import get_redis_connection
  
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -12,12 +13,13 @@ import requests as req
 from bs4 import BeautifulSoup
 import random
 import datetime
+import json
 
 from .services.ptt_beauty import get_beauty_imgs, get_someone_beauty_imgs, beauty_template_message
 from .services.user_money import raise_money, reduce_money
 from .services.weather import get_today_weather, weather_template_message
 from .services.whitecat_wiki import character_info_template_message
-from .services.line_bot import push_morning_messages
+from .services.line_bot import push_message, push_morning_messages
 from .models import LineUser, DailyAttendance
 
 # Create your views here.
@@ -183,6 +185,27 @@ def push_morning_message(request):
         return HttpResponseBadRequest()
     user_id = 'C2465b9bf8ce854820433f2e83cb50e85'
     push_morning_messages(user_id)
+    return HttpResponse()
+
+@csrf_exempt
+def remind_reverve_movie_ticket(request):
+    if request.method != 'POST':
+        return HttpResponseBadRequest()
+    con = get_redis_connection("default")
+    body = request.body.decode('utf-8')
+    body = json.loads(body)
+    headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36'}
+    url = f"https://www.vscinemas.com.tw/vsTicketing/ticketing/ticket.aspx?cinema={body['cinema']}&movie={body['movie']}"
+    response = req.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, "html.parser")
+    days = soup.find_all(class_='movieDay')
+    user_id = 'C2465b9bf8ce854820433f2e83cb50e85'
+    for day in days:
+        date = day.find('h4').text
+        if f"{body['year']} 年 {body['month']} 月 {body['day']} 日" in date and not con.exists('movie_ticket'):
+            con.set('movie_ticket', 1)
+            con.expire('movie_ticket', 60 * 60 * 24)
+            push_message(user_id, f"可以訂{body['month']}月{body['day']}日的票了")
     return HttpResponse()
 
 def translation(text, dest):
