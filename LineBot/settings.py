@@ -156,3 +156,6 @@ GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY', default=env('GOOGLE_API_KEY'))
 
 # Weather API
 WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY', default=env('WEATHER_API_KEY'))
+
+# OpenAI API
+OPEN_AI_API_KEY = os.environ.get('OPEN_AI_API_KEY', default=env('OPEN_AI_API_KEY'))
