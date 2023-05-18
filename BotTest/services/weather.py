@@ -175,7 +175,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['臺北市']['wx'][0]} / {weather['臺北市']['wx'][1]}",
+                            label=f"{weather['臺北市']['wx'][0]} / {weather['臺北市']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
@@ -193,7 +193,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['新北市']['wx'][0]} / {weather['新北市']['wx'][1]}",
+                            label=f"{weather['新北市']['wx'][0]} / {weather['新北市']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
@@ -211,7 +211,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['臺中市']['wx'][0]} / {weather['臺中市']['wx'][1]}",
+                            label=f"{weather['臺中市']['wx'][0]} / {weather['臺中市']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
@@ -229,7 +229,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['彰化縣']['wx'][0]} / {weather['彰化縣']['wx'][1]}",
+                            label=f"{weather['彰化縣']['wx'][0]} / {weather['彰化縣']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
@@ -247,7 +247,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['雲林縣']['wx'][0]} / {weather['雲林縣']['wx'][1]}",
+                            label=f"{weather['雲林縣']['wx'][0]} / {weather['雲林縣']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
@@ -265,7 +265,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['臺南市']['wx'][0]} / {weather['臺南市']['wx'][1]}",
+                            label=f"{weather['臺南市']['wx'][0]} / {weather['臺南市']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
@@ -283,7 +283,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['高雄市']['wx'][0]} / {weather['高雄市']['wx'][1]}",
+                            label=f"{weather['高雄市']['wx'][0]} / {weather['高雄市']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
@@ -301,7 +301,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['宜蘭縣']['wx'][0]} / {weather['宜蘭縣']['wx'][1]}",
+                            label=f"{weather['宜蘭縣']['wx'][0]} / {weather['宜蘭縣']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
@@ -319,7 +319,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['桃園市']['wx'][0]} / {weather['桃園市']['wx'][1]}",
+                            label=f"{weather['桃園市']['wx'][0]} / {weather['桃園市']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
@@ -337,7 +337,7 @@ def weather_template_message(weather):
                             data='test'
                         ),
                         PostbackAction(
-                            label=f"{weather['苗栗縣']['wx'][0]} / {weather['苗栗縣']['wx'][1]}",
+                            label=f"{weather['苗栗縣']['wx'][0]} / {weather['苗栗縣']['wx'][1]}"[:20],
                             data='test'
                         )
                     ]
