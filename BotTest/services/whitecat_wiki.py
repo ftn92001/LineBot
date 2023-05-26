@@ -31,7 +31,7 @@ def character_info(con):
             uri = f"https://shironekoproject.fandom.com{characters[j]['href']}"
             img = characters[j].find('img')
             src = img.get('data-src') or img['src']
-            name = img['alt'].split('s.png')[0]
+            name = img['alt'].split('s')[0]
             if j != 0:
                 content.append(deepcopy(src_template))
                 content.append(deepcopy(name_template))
