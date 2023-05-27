@@ -98,14 +98,22 @@ CACHES = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'LineBot',
-        'HOST': os.environ.get('MYSQL_HOST', default=env('MYSQL_HOST')),
-        'PORT': 3306,
-        'USER': os.environ.get('MYSQL_USER', default=env('MYSQL_USER')),
-        'PASSWORD': os.environ.get('MYSQL_PASSWORD', default=env('MYSQL_PASSWORD'))
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Use Mysql
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'LineBot',
+#         'HOST': os.environ.get('MYSQL_HOST', default=env('MYSQL_HOST')),
+#         'PORT': 3306,
+#         'USER': os.environ.get('MYSQL_USER', default=env('MYSQL_USER')),
+#         'PASSWORD': os.environ.get('MYSQL_PASSWORD', default=env('MYSQL_PASSWORD'))
+#     }
+# }
 
 
 # Password validation

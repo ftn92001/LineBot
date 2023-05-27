@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbid
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django_redis import get_redis_connection
- 
+
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextSendMessage, ImageSendMessage, TemplateSendMessage, ImageCarouselTemplate, ImageCarouselColumn, MessageAction, FlexSendMessage
@@ -32,7 +32,7 @@ jpy = ['日圓', '日元', '日幣', 'JPY', 'jpy']
 hkd = ['港幣', '港元', '港圓', 'HKD', 'hkd']
 krw = ['韓元', '韓圓', 'KRW', 'krw']
 cny = ['人民幣', 'CNY', 'cny']
- 
+
 def home_view(request):
     image_src, image_name, urls = get_beauty_imgs(1)
     return render(request, "index.html", {

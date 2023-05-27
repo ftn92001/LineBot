@@ -1,6 +1,7 @@
 import random
 import json
 from copy import deepcopy
+from retrying import retry
 from ..models import Photo
 from linebot.models import FlexSendMessage
 
@@ -10,12 +11,16 @@ def get_beauty_imgs(amount):
     urls = []
     count = Photo.objects.count()
     for _ in range(amount):
-        pk = random.randint(0, count - 1)
-        photo = Photo.objects.get(pk=pk)
+        photo = query_img(count)
         imgs.append(photo.image_src)
         texts.append(photo.name)
         urls.append(photo.url)
     return imgs, texts, urls
+
+@retry(stop_max_attempt_number=100)
+def query_img(count):
+    pk = random.randint(0, count - 1)
+    return Photo.objects.get(pk=pk)
 
 def get_someone_beauty_imgs(amount, query=None):
     if not query:
