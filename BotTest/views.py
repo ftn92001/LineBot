@@ -21,6 +21,7 @@ from .services.weather import get_today_weather, weather_template_message
 from .services.whitecat_wiki import character_info_template_message
 from .services.line_bot import push_message, push_morning_messages
 from .services.open_ai import call_completions
+from .services.anime import anime
 from .models import LineUser, DailyAttendance
 
 # Create your views here.
@@ -62,7 +63,11 @@ def callback(request):
             print(source_group)
             user = LineUser.objects.get_or_create(line_id = source_user, defaults={"line_id": source_user, "money": 0})[0]
             if text[:3] in ['!指令', '！指令']:
-                texts.append('!指令\n!白貓\n!天氣\n!簽到\n!石頭\n!抽女朋友\n!十連抽\n!北(中高)捷\n!p搜圖\n!yt搜影片\n@中英日韓翻譯\n!遊戲\n!抽\n!ai\n美日韓港人民幣換算')
+                texts.append('!指令\n!白貓\n!天氣\n!簽到\n!石頭\n!抽女朋友\n!十連抽\n!北(中高)捷\n!p搜圖\n!yt搜影片\n@中英日韓翻譯\n!遊戲\n!抽\n!ai\n美日韓港人民幣換算\n!新番')
+            elif text[:3] in ['!新番', '！新番']:
+                query = text.split()[1]
+                line_bot_api.reply_message(event.reply_token, anime(query))
+                return HttpResponse()
             elif text[:3] in ['!白貓', '！白貓']:
                 line_bot_api.reply_message(event.reply_token, character_info_template_message())
                 return HttpResponse()
