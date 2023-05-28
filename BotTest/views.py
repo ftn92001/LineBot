@@ -63,7 +63,7 @@ def callback(request):
             print(source_group)
             user = LineUser.objects.get_or_create(line_id = source_user, defaults={"line_id": source_user, "money": 0})[0]
             if text[:3] in ['!指令', '！指令']:
-                texts.append('!指令\n!白貓\n!天氣\n!簽到\n!石頭\n!抽女朋友\n!十連抽\n!北(中高)捷\n!p搜圖\n!yt搜影片\n@中英日韓翻譯\n!遊戲\n!抽\n!ai\n美日韓港人民幣換算\n!新番')
+                texts.append('!指令\n!白貓\n!天氣\n!簽到\n!石頭\n!抽女朋友\n!十連抽\n!北(中高)捷\n!p搜圖\n!yt搜影片\n@中英日韓翻譯\n!遊戲\n!抽\n!ai\n美日韓港人民幣換算\n!新番 xxxx年x季新番')
             elif text[:3] in ['!新番', '！新番']:
                 query = text.split()[1]
                 line_bot_api.reply_message(event.reply_token, anime(query))
