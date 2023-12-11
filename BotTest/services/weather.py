@@ -4,7 +4,7 @@ from LineBot.settings import WEATHER_API_KEY
 
 
 def get_today_weather():
-    url = f'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization={WEATHER_API_KEY}'
+    url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization={WEATHER_API_KEY}'
     response = req.get(url)
     data = response.json()
     # weather['臺北市']={wx: ['', ''], pop: ['', ''], minT: ['', ''], maxT: ['', '']}
