@@ -8,7 +8,6 @@ from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextSendMessage, ImageSendMessage, TemplateSendMessage, ImageCarouselTemplate, ImageCarouselColumn, MessageAction, FlexSendMessage
 
-from googletrans import Translator
 import requests as req
 from bs4 import BeautifulSoup
 import random
@@ -138,13 +137,13 @@ def callback(request):
             elif text[:4].lower() in ['!gif', '！gif']:
                 texts = [random.sample(get_gif_imgs(text[4:])[0], 1)[0]]
             elif text[:2] == '@中':
-                texts = [translation(text[2:], 'zh-tw')]
+                texts = [translation(text[2:], '中')]
             elif text[:2] == '@英':
-                texts = [translation(text[2:], 'en')]
+                texts = [translation(text[2:], '英')]
             elif text[:2] == '@日':
-                texts = [translation(text[2:], 'ja')]
+                texts = [translation(text[2:], '日')]
             elif text[:2] == '@韓':
-                texts = [translation(text[2:], 'ko')]
+                texts = [translation(text[2:], '韓')]
             elif text[:3] in ['!遊戲', '！遊戲']:
                 # !遊戲 3000 200 10 5
                 #   0    1   2   3  4
@@ -236,8 +235,8 @@ def celebrate_birthday(request):
     return HttpResponse()
 
 def translation(text, dest):
-    transtor = Translator()
-    return transtor.translate(text, dest).text
+    content = f"請把[{text}]翻譯成{dest}文"
+    return generate_content(content)
     
 def get_image(str):
     headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36'}

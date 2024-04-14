@@ -30,4 +30,4 @@ def call_completions(content):
     prev_content = content
     prev_answer = answer
     print(response.json())
-    return answer.replace('\n',' ')
+    return answer
