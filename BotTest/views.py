@@ -258,91 +258,24 @@ def get_video(str):
     return f'https://www.youtube.com/watch?v={v}'
 
 def get_price(currency, text):
-    match currency:
-        case ('usd'):
-            for i in usd:
-                text = text.replace(i, 'usd')
-            rindex = text.find('usd')
-            dot_index = -1
-            i = rindex - 1
-            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
-                if text[i] == '.':
-                    dot_index = i
-                i -= 1
-            return float(text[i + 1:rindex])
-        case ('jpy'):
-            for i in jpy:
-                text = text.replace(i, 'jpy')
-            rindex = text.find('jpy')
-            dot_index = -1
-            i = rindex - 1
-            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
-                if text[i] == '.':
-                    dot_index = i
-                i -= 1
-            return float(text[i + 1:rindex])
-        case ('hkd'):
-            for i in hkd:
-                text = text.replace(i, 'hkd')
-            rindex = text.find('hkd')
-            dot_index = -1
-            i = rindex - 1
-            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
-                if text[i] == '.':
-                    dot_index = i
-                i -= 1
-            return float(text[i + 1:rindex])
-        case ('krw'):
-            for i in krw:
-                text = text.replace(i, 'krw')
-            rindex = text.find('krw')
-            dot_index = -1
-            i = rindex - 1
-            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
-                if text[i] == '.':
-                    dot_index = i
-                i -= 1
-            return float(text[i + 1:rindex])
-        case ('cny'):
-            for i in cny:
-                text = text.replace(i, 'cny')
-            rindex = text.find('cny')
-            dot_index = -1
-            i = rindex - 1
-            while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
-                if text[i] == '.':
-                    dot_index = i
-                i -= 1
-            return float(text[i + 1:rindex])
-        
+    for i in globals()[currency]:
+        text = text.replace(i, currency)
+    rindex = text.find(currency)
+    dot_index = -1
+    i = rindex - 1
+    while (i >= 0 and (text[i: rindex].isdigit() or text[i] == '.' or (dot_index != -1 and text[i:dot_index].isdigit()))):
+        if text[i] == '.':
+            dot_index = i
+        i -= 1
+    return float(text[i + 1:rindex])
+
 def get_currency(currency, price):
     url = 'https://rate.bot.com.tw/xrt?Lang=zh-TW'
     response = req.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
     trs = soup.find_all('tr')
-    match currency:
-        case ('usd'):
-            for tr in trs:
-                divs = tr.find_all('div')
-                if len(divs) > 2 and '美金 (USD)' in divs[2].text:
-                    return f"{price}美金(USD) = {price * float(tr.find_all('td')[2].text)} 新台幣(TWD)"    
-        case ('jpy'):
-            for tr in trs:
-                divs = tr.find_all('div')
-                if len(divs) > 2 and '日圓 (JPY)' in tr.find_all('div')[2].text:
-                    return f"{price}日圓(JPY) = {price * float(tr.find_all('td')[2].text)} 新台幣(TWD)"
-        case ('hkd'):
-            for tr in trs:
-                divs = tr.find_all('div')
-                if len(divs) > 2 and '港幣 (HKD)' in tr.find_all('div')[2].text:
-                    return f"{price}港幣(HKD) = {price * float(tr.find_all('td')[2].text)} 新台幣(TWD)"
-        case ('krw'):
-            for tr in trs:
-                divs = tr.find_all('div')
-                if len(divs) > 2 and '韓元 (KRW)' in tr.find_all('div')[2].text:
-                    return f"{price}韓元(KRW) = {price * float(tr.find_all('td')[2].text)} 新台幣(TWD)"
-        case ('cny'):
-            for tr in trs:
-                divs = tr.find_all('div')
-                if len(divs) > 2 and '人民幣 (CNY)' in tr.find_all('div')[2].text:
-                    return f"{price}人民幣(CNY) = {price * float(tr.find_all('td')[2].text)} 新台幣(TWD)"
+    currency_dict = {'usd': '美金 (USD)', 'jpy': '日圓 (JPY)', 'hkd': '港幣 (HKD)', 'krw': '韓元 (KRW)', 'cny': '人民幣 (CNY)'}
+    for tr in trs:
+        divs = tr.find_all('div')
+        if len(divs) > 2 and currency_dict[currency] in divs[2].text:
+            return f"{price}{currency_dict[currency]} = {price * float(tr.find_all('td')[2].text)} 新台幣(TWD)"
