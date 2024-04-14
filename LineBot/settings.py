@@ -159,11 +159,17 @@ STATIC_ROOT = 'static'
 LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN', default=env('LINE_CHANNEL_ACCESS_TOKEN'))
 LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET', default=env('LINE_CHANNEL_SECRET'))
 
-# Google API
-GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY', default=env('GOOGLE_API_KEY'))
+# YOUTUBE API
+YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY', default=env('YOUTUBE_API_KEY'))
 
 # Weather API
 WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY', default=env('WEATHER_API_KEY'))
 
 # OpenAI API
 OPEN_AI_API_KEY = os.environ.get('OPEN_AI_API_KEY', default=env('OPEN_AI_API_KEY'))
+
+# TENOR API
+TENOR_API_KEY = os.environ.get('TENOR_API_KEY', default=env('TENOR_API_KEY'))
+
+# GEMINI API
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', default=env('GEMINI_API_KEY'))
