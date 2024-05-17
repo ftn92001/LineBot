@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 import random
 import datetime
 import json
+import base64
 
 from .services.ptt_beauty import get_beauty_imgs, get_someone_beauty_imgs, beauty_template_message
 from .services.user_money import raise_money, reduce_money
@@ -22,12 +23,14 @@ from .services.line_bot import push_message, push_morning_messages
 from .services.gemini import generate_content
 from .services.anime import anime
 from .services.tenor import get_gif_imgs
+from .services.redis_service import RedisService
 from .models import LineUser, DailyAttendance
 
 # Create your views here.
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 yt_api = settings.YOUTUBE_API_KEY
+redis = RedisService()
 usd = ['美金', 'USD', 'usd']
 jpy = ['日圓', '日元', '日幣', 'JPY', 'jpy']
 hkd = ['港幣', '港元', '港圓', 'HKD', 'hkd']
@@ -54,139 +57,153 @@ def callback(request):
         return HttpResponseBadRequest()
     for event in events:
         if isinstance(event, MessageEvent):
-            text = event.message.text # 傳進來的訊息
-            imgs = []
-            texts = []
-            source_user = event.source.user_id
-            source_group = event.source.group_id if hasattr(event.source, 'group_id') else None
-            print(source_user)
-            print(source_group)
-            user = LineUser.objects.get_or_create(line_id = source_user, defaults={"line_id": source_user, "money": 0})[0]
-            if text[:3] in ['!指令', '！指令']:
-                texts.append('!指令\n!白貓\n!天氣\n!簽到\n!石頭\n!抽女朋友\n!十連抽\n!北(中高)捷\n!p搜圖\n!yt搜影片\n!git\n@中英日韓翻譯\n!遊戲\n!抽\n!ai\n美日韓港人民幣換算\n!新番 xxxx年x季新番')
-            elif text[:3] in ['!新番', '！新番']:
-                query = text.split()[1]
-                line_bot_api.reply_message(event.reply_token, anime(query))
-                return HttpResponse()
-            elif text[:3] in ['!白貓', '！白貓']:
-                line_bot_api.reply_message(event.reply_token, character_info_template_message())
-                return HttpResponse()
-            elif text[:3] in ['!天氣', '！天氣']:
-                line_bot_api.reply_message(event.reply_token, weather_template_message(get_today_weather()))
-                return HttpResponse()
-            elif text[:3] in ['!簽到', '！簽到']:
-                daily_attendance = user.daily_attendance
-                last_daily_attendance = daily_attendance.latest('id').time if daily_attendance.exists() else None
-                if  last_daily_attendance is None or last_daily_attendance.date() != datetime.date.today():
-                    DailyAttendance.objects.create(line_user = user)
-                    raise_money(user, 50)
-                    texts = [f"成功簽到，你有{user.money}顆石頭"]
-                else:
-                    texts = ['今天已經簽到過了']
-            elif text[:3] in ['!石頭', '！石頭']:
-                texts = [f"你還有{user.money}顆石頭"]
-            elif text[:3] in ['!正妹', '！正妹']:
-                if user.money >= 1 and (len(text) == 3 or text[3] not in [':', '：']):
-                    imgs, texts, urls = get_beauty_imgs(1)
-                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
-                    reduce_money(user, 1)
-                elif user.money >= 2 and text[3] in [':', '：']:
-                    imgs, texts, urls = get_someone_beauty_imgs(1, text[4:])
-                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
-                    if imgs and texts: 
-                        reduce_money(user, 2)
-                else:
-                    texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
-                return HttpResponse()
-            elif text[:5] in ['!抽女朋友', '！抽女朋友']:
-                if user.money >= 1 and (len(text) == 5 or text[5] not in [':', '：']):
-                    imgs, texts, urls = get_beauty_imgs(1)
-                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
-                    reduce_money(user, 1)
-                elif user.money >= 2 and text[5] in [':', '：']:
-                    imgs, texts, urls = get_someone_beauty_imgs(1, text[6:])
-                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
-                    if imgs and texts: 
-                        reduce_money(user, 2)
-                else:
-                    texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
-                return HttpResponse()
-            elif text[:4] in ['!十連抽', '！十連抽']:
-                if user.money >= 10 and (len(text) == 4 or text[4] not in [':', '：']):
-                    imgs, texts, urls = get_beauty_imgs(11)
-                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
-                    reduce_money(user, 10)
-                elif user.money >= 20 and text[4] in [':', '：']:
-                    imgs, texts, urls = get_someone_beauty_imgs(11, text[5:])
-                    line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
-                    if imgs and texts:
-                        reduce_money(user, 20)
-                else:
-                    texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
-                return HttpResponse()
-            elif text[:3] in ['!北捷', '！北捷']:
-                imgs = ['https://web.metro.taipei/pages/assets/images/routemap2020.png']
-            elif text[:3] in ['!中捷', '！中捷']:
-                imgs = ['https://www.tmrt.com.tw/static/img/metro-life/map/map.jpg']
-            elif text[:3] in ['!高捷', '！高捷']:
-                imgs = ['https://www.krtc.com.tw/Content/userfiles/images/guide-map.jpg?v=c24_1']
-            elif text[:2] in ['!p', '！p', '!P', '！P']:
-                imgs = [get_image(text[2:])]
-            elif text[:3].lower() in ['!yt', '！yt']:
-                texts = [get_video(text[3:])]
-            elif text[:4].lower() in ['!gif', '！gif']:
-                texts = [random.sample(get_gif_imgs(text[4:])[0], 1)[0]]
-            elif text[:2] == '@中':
-                texts = [translation(text[2:], '中')]
-            elif text[:2] == '@英':
-                texts = [translation(text[2:], '英')]
-            elif text[:2] == '@日':
-                texts = [translation(text[2:], '日')]
-            elif text[:2] == '@韓':
-                texts = [translation(text[2:], '韓')]
-            elif text[:3] in ['!遊戲', '！遊戲']:
-                # !遊戲 3000 200 10 5
-                #   0    1   2   3  4
-                global moneys
-                moneys = text.split(' ')
-                moneys = moneys[1:]
-                texts = ['輸入"!抽"進行']
-            elif text[:2] in ['!抽', '！抽']:
-                if moneys:
-                    text = random.choice(moneys)
-                    moneys.remove(text)
-                else:
-                    text = '已抽完，輸入"!遊戲 xx xx"重新進行'
-                texts = [text]
-            elif text[:3].lower() in ['!ai', '！ai']:
-                texts = [generate_content(text[3:])]
-            elif any(currency in text for currency in usd):
-                price = get_price('usd', text)
-                texts = [get_currency('usd', price)]
-            elif any(currency in text for currency in jpy):
-                price = get_price('jpy', text)
-                texts = [get_currency('jpy', price)]
-            elif any(currency in text for currency in hkd):
-                price = get_price('hkd', text)
-                texts = [get_currency('hkd', price)]
-            elif any(currency in text for currency in krw):
-                price = get_price('krw', text)
-                texts = [get_currency('krw', price)]
-            elif any(currency in text for currency in cny):
-                price = get_price('cny', text)
-                texts = [get_currency('cny', price)]
-            else:
-                continue
-            
-            msgs = []
-            # 回復圖片 ， original_content_url='要傳的圖片' preview_image_url='要傳的圖片預覽'
-            if imgs:
-                msgs.extend(ImageSendMessage(original_content_url=img, preview_image_url=img) for img in imgs)
-            # 回復文字 ， text='要傳的訊息'
-            if texts:
-                msgs.extend(TextSendMessage(text = text) for text in texts)
-            msgs = msgs[:5]
-            line_bot_api.reply_message(event.reply_token, msgs)
+            message_type = event.message.type # 傳進來的訊息類型
+            match message_type:
+                case 'text':
+                    text = event.message.text # 傳進來的訊息
+                    imgs = []
+                    texts = []
+                    source_user = event.source.user_id
+                    source_group = event.source.group_id if hasattr(event.source, 'group_id') else None
+                    print(source_user)
+                    print(source_group)
+                    user = LineUser.objects.get_or_create(line_id = source_user, defaults={"line_id": source_user, "money": 0})[0]
+                    if text[:3] in ['!指令', '！指令']:
+                        texts.append('!指令\n!白貓\n!天氣\n!簽到\n!石頭\n!抽女朋友\n!十連抽\n!北(中高)捷\n!p搜圖\n!yt搜影片\n!git\n@中英日韓翻譯\n!遊戲\n!抽\n!ai\n美日韓港人民幣換算\n!新番 xxxx年x季新番')
+                    elif text[:3] in ['!新番', '！新番']:
+                        query = text.split()[1]
+                        line_bot_api.reply_message(event.reply_token, anime(query))
+                        return HttpResponse()
+                    elif text[:3] in ['!白貓', '！白貓']:
+                        line_bot_api.reply_message(event.reply_token, character_info_template_message())
+                        return HttpResponse()
+                    elif text[:3] in ['!天氣', '！天氣']:
+                        line_bot_api.reply_message(event.reply_token, weather_template_message(get_today_weather()))
+                        return HttpResponse()
+                    elif text[:3] in ['!簽到', '！簽到']:
+                        daily_attendance = user.daily_attendance
+                        last_daily_attendance = daily_attendance.latest('id').time if daily_attendance.exists() else None
+                        if  last_daily_attendance is None or last_daily_attendance.date() != datetime.date.today():
+                            DailyAttendance.objects.create(line_user = user)
+                            raise_money(user, 50)
+                            texts = [f"成功簽到，你有{user.money}顆石頭"]
+                        else:
+                            texts = ['今天已經簽到過了']
+                    elif text[:3] in ['!石頭', '！石頭']:
+                        texts = [f"你還有{user.money}顆石頭"]
+                    elif text[:3] in ['!正妹', '！正妹']:
+                        if user.money >= 1 and (len(text) == 3 or text[3] not in [':', '：']):
+                            imgs, texts, urls = get_beauty_imgs(1)
+                            line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                            reduce_money(user, 1)
+                        elif user.money >= 2 and text[3] in [':', '：']:
+                            imgs, texts, urls = get_someone_beauty_imgs(1, text[4:])
+                            line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                            if imgs and texts: 
+                                reduce_money(user, 2)
+                        else:
+                            texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
+                        return HttpResponse()
+                    elif text[:5] in ['!抽女朋友', '！抽女朋友']:
+                        if user.money >= 1 and (len(text) == 5 or text[5] not in [':', '：']):
+                            imgs, texts, urls = get_beauty_imgs(1)
+                            line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                            reduce_money(user, 1)
+                        elif user.money >= 2 and text[5] in [':', '：']:
+                            imgs, texts, urls = get_someone_beauty_imgs(1, text[6:])
+                            line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                            if imgs and texts: 
+                                reduce_money(user, 2)
+                        else:
+                            texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
+                        return HttpResponse()
+                    elif text[:4] in ['!十連抽', '！十連抽']:
+                        if user.money >= 10 and (len(text) == 4 or text[4] not in [':', '：']):
+                            imgs, texts, urls = get_beauty_imgs(11)
+                            line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                            reduce_money(user, 10)
+                        elif user.money >= 20 and text[4] in [':', '：']:
+                            imgs, texts, urls = get_someone_beauty_imgs(11, text[5:])
+                            line_bot_api.reply_message(event.reply_token, beauty_template_message(imgs, texts, urls))  
+                            if imgs and texts:
+                                reduce_money(user, 20)
+                        else:
+                            texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
+                        return HttpResponse()
+                    elif text[:3] in ['!北捷', '！北捷']:
+                        imgs = ['https://web.metro.taipei/pages/assets/images/routemap2020.png']
+                    elif text[:3] in ['!中捷', '！中捷']:
+                        imgs = ['https://www.tmrt.com.tw/static/img/metro-life/map/map.jpg']
+                    elif text[:3] in ['!高捷', '！高捷']:
+                        imgs = ['https://www.krtc.com.tw/Content/userfiles/images/guide-map.jpg?v=c24_1']
+                    elif text[:2] in ['!p', '！p', '!P', '！P']:
+                        imgs = [get_image(text[2:])]
+                    elif text[:3].lower() in ['!yt', '！yt']:
+                        texts = [get_video(text[3:])]
+                    elif text[:4].lower() in ['!gif', '！gif']:
+                        texts = [random.sample(get_gif_imgs(text[4:])[0], 1)[0]]
+                    elif text[:2] == '@中':
+                        texts = [translation(text[2:], '中')]
+                    elif text[:2] == '@英':
+                        texts = [translation(text[2:], '英')]
+                    elif text[:2] == '@日':
+                        texts = [translation(text[2:], '日')]
+                    elif text[:2] == '@韓':
+                        texts = [translation(text[2:], '韓')]
+                    elif text[:3] in ['!遊戲', '！遊戲']:
+                        # !遊戲 3000 200 10 5
+                        #   0    1   2   3  4
+                        global moneys
+                        moneys = text.split(' ')
+                        moneys = moneys[1:]
+                        texts = ['輸入"!抽"進行']
+                    elif text[:2] in ['!抽', '！抽']:
+                        if moneys:
+                            text = random.choice(moneys)
+                            moneys.remove(text)
+                        else:
+                            text = '已抽完，輸入"!遊戲 xx xx"重新進行'
+                        texts = [text]
+                    elif text[:3].lower() in ['!ai', '！ai']:
+                        key = 'temp_image'
+                        image_content = redis.get_value(key).decode('utf-8') if redis.check_exists(key) else None
+                        texts = [generate_content(text[3:], image_content)]
+                    elif text[:5] in ['!刪除圖片', '！刪除圖片']:
+                        key = 'temp_image'
+                        if redis.delete_value(key):
+                            texts = ['已刪除圖片']
+                    elif any(currency in text for currency in usd):
+                        price = get_price('usd', text)
+                        texts = [get_currency('usd', price)]
+                    elif any(currency in text for currency in jpy):
+                        price = get_price('jpy', text)
+                        texts = [get_currency('jpy', price)]
+                    elif any(currency in text for currency in hkd):
+                        price = get_price('hkd', text)
+                        texts = [get_currency('hkd', price)]
+                    elif any(currency in text for currency in krw):
+                        price = get_price('krw', text)
+                        texts = [get_currency('krw', price)]
+                    elif any(currency in text for currency in cny):
+                        price = get_price('cny', text)
+                        texts = [get_currency('cny', price)]
+                    else:
+                        continue
+                    
+                    msgs = []
+                    # 回復圖片 ， original_content_url='要傳的圖片' preview_image_url='要傳的圖片預覽'
+                    if imgs:
+                        msgs.extend(ImageSendMessage(original_content_url=img, preview_image_url=img) for img in imgs)
+                    # 回復文字 ， text='要傳的訊息'
+                    if texts:
+                        msgs.extend(TextSendMessage(text = text) for text in texts)
+                    msgs = msgs[:5]
+                    line_bot_api.reply_message(event.reply_token, msgs)
+                case 'image':
+                    message_id = event.message.id  # 取得訊息ID
+                    image_content = line_bot_api.get_message_content(message_id).content  # 根據訊息ID取得訊息內容
+                    image_base64_string = base64.b64encode(image_content)
+                    redis.set_value("temp_image", image_base64_string)
     return HttpResponse()
 
 @csrf_exempt

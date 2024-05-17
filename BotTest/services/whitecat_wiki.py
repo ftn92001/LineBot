@@ -3,9 +3,9 @@ from bs4 import BeautifulSoup
 import json
 from copy import deepcopy
 from linebot.models import FlexSendMessage
-from django_redis import get_redis_connection
+from BotTest.services.redis_service import RedisService
 
-def character_info(con):
+def character_info(redis):
     url  = "https://shironekoproject.fandom.com/zh/wiki/%E4%BE%9D%E7%99%BB%E5%A0%B4%E6%99%82%E9%96%93"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -38,11 +38,10 @@ def character_info(con):
             content[2*(j+1)]['action']['uri'] = uri
             content[2*(j+1)]['contents'][0]['url'] = src
             content[2*(j+1)+1]['contents'][0]['text'] = name
-    con.set("white_cat", json.dumps(file))
-    con.expire("white_cat", 60 * 10)
+    redis.set_value("white_cat", json.dumps(file), 60 * 10)
     return file
 
 def character_info_template_message():
-    con = get_redis_connection("default")
-    message = json.loads(con.get("white_cat")) if con.exists("white_cat") else character_info(con)
+    redis = RedisService()
+    message = json.loads(redis.get_value("white_cat")) if redis.check_exists("white_cat") else character_info(redis)
     return FlexSendMessage(alt_text='白貓角色資訊', contents=message)
