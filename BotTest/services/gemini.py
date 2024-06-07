@@ -8,7 +8,6 @@ def generate_content(content, image_content=None):
     global prev_content
     global prev_answer
     if image_content:
-        model = "gemini-1.5-flash-latest"
         contents = [
             {
                 "role": "user",
@@ -24,13 +23,13 @@ def generate_content(content, image_content=None):
             }
         ]
     else:
-        model = "gemini-1.5-flash-latest"
         contents = [
             {"role": "user", "parts": [{ "text": prev_content }]},
             {"role": "model", "parts": [{ "text": prev_answer }]},
             {"role": "user", "parts": [{ "text": content }]}
         ]
 
+    model = "gemini-1.5-flash-latest"
     response = requests.post(
         f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}',
         headers = {

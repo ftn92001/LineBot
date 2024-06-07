@@ -5,3 +5,6 @@ app.yaml
 .gcloudignore
 __pycache__
 .env
+.DS_Stroe
+.github
+.devcontainer
