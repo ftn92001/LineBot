@@ -8,7 +8,7 @@ def generate_content(content, image_content=None):
     global prev_content
     global prev_answer
     if image_content:
-        model = "gemini-1.5-pro-latest"
+        model = "gemini-1.5-flash-latest"
         contents = [
             {
                 "role": "user",
@@ -24,7 +24,7 @@ def generate_content(content, image_content=None):
             }
         ]
     else:
-        model = "gemini-pro"
+        model = "gemini-1.5-flash-latest"
         contents = [
             {"role": "user", "parts": [{ "text": prev_content }]},
             {"role": "model", "parts": [{ "text": prev_answer }]},
