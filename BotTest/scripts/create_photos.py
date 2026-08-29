@@ -6,8 +6,9 @@ PTT_URL = 'https://www.ptt.cc'
 
 def create_beauty_imgs():
     imgs = []
-    # 從上次更新到的頁數開始
-    current_page = get_web_page(f"{PTT_URL}/bbs/Beauty/index4000.html")
+    # 從上次更新到的頁數開始 2026/08/28
+    # python manage.py runscript create_photos --chdir BotTest
+    current_page = get_web_page(f"{PTT_URL}/bbs/Beauty/index3787.html")
     current_articles, next_url = get_articles(current_page)
     updated_objs = []
     created_objs = []
@@ -55,13 +56,27 @@ def create_beauty_imgs():
     
 
 def get_web_page(url):
-    resp = requests.get(
-        url=url,
-        cookies={'over18': '1'}
-    )
-    if resp.status_code == 200:
-        return resp.text
-    print('Invalid url:', resp.url)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (compatible; LineBot/1.0; +https://github.com/ftn92001/LineBot)'
+    }
+    last_err = None
+    # 失敗重試，避免 PTT 偶發斷線（BrokenPipe / Connection aborted）
+    for _ in range(3):
+        try:
+            resp = requests.get(
+                url=url,
+                headers=headers,
+                cookies={'over18': '1'},
+                timeout=30
+            )
+            if resp.status_code == 200:
+                return resp.text
+            print('Invalid status:', resp.status_code, resp.url)
+            return None
+        except requests.exceptions.RequestException as e:
+            last_err = e
+            print(f'retry: {url} -> {e}')
+    print(f'give up: {url} -> {last_err}')
     return None
 
 
@@ -74,7 +89,7 @@ def get_articles(dom):
     articles = []
     divs = soup.find_all('div', 'r-ent')
     for div in divs:
-        if '正妹' in div.find('div', 'title').text and div.find('a'):
+        if '正妹' in div.find('div', 'title').text and div.find('a') and '肉特' not in div.find('div', 'title'):
             href = div.find('a')['href']
             title = div.find('a').text
             author = div.find('div', 'author').text if div.find('div', 'author') else ''
