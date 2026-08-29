@@ -1,19 +1,51 @@
-version: '3'
 services:
+  mysql:
+    image: mysql:8.0
+    container_name: linebot-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: linebot-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
   line_bot:
     build: .
+    container_name: linebot-app
     ports:
-     - 8000:8000
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=LineBot.settings
+      - DB_ENGINE=mysql
+      - REDIS_LOCATION=redis://redis:6379/0
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_NAME=${MYSQL_DATABASE}
+    env_file:
+      - .env
+    volumes:
+      # 掛載本機專案，改程式碼即時生效（不需重新 build）
+      - .:/home/app
     command: sh -c "
-      sleep 20 &&
+      sleep 15 &&
       python manage.py migrate &&
       python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - mysql
-  mysql:
-      image: mysql
-      ports:
-       - 3306:3306
-      environment:
-       - MYSQL_ROOT_PASSWORD=password
-       - MYSQL_DATABASE=LineBot
+      - redis
+
+volumes:
+  mysql-data:
+  redis-data:

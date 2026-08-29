@@ -81,13 +81,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LineBot.wsgi.application'
 
+# Redis 快取。本地 docker-compose 提供的 redis 預設在 redis:6379
+REDIS_LOCATION = os.environ.get('REDIS_LOCATION', default=env('REDIS_LOCATION', default='redis://redis:6379/0'))
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', default=env('REDIS_PASSWORD', default=None))
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get('REDIS_LOCATION', default=env('REDIS_LOCATION')),
+        "LOCATION": REDIS_LOCATION,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": os.environ.get('REDIS_PASSWORD', default=env('REDIS_PASSWORD'))
+            "PASSWORD": REDIS_PASSWORD
         },
         "KEY_PREFIX": "Cache"
     }
@@ -95,25 +99,29 @@ CACHES = {
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
+# 用環境變數 DB_ENGINE 切換 sqlite / mysql（預設 mysql）
+#  - sqlite: DB_ENGINE=sqlite（配合 DATABASE_PATH 指定 .sqlite3 檔）
+#  - mysql : DB_ENGINE=mysql（配合 MYSQL_HOST/USER/PASSWORD/NAME）
+DB_ENGINE = os.environ.get('DB_ENGINE', default=env('DB_ENGINE', default='mysql'))
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DB_ENGINE == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.environ.get('DATABASE_PATH', default=str(BASE_DIR / 'db.sqlite3')),
+        }
     }
-}
-
-# Use Mysql
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'LineBot',
-#         'HOST': os.environ.get('MYSQL_HOST', default=env('MYSQL_HOST')),
-#         'PORT': 3306,
-#         'USER': os.environ.get('MYSQL_USER', default=env('MYSQL_USER')),
-#         'PASSWORD': os.environ.get('MYSQL_PASSWORD', default=env('MYSQL_PASSWORD'))
-#     }
-# }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('MYSQL_NAME', default=env('MYSQL_NAME', default='LineBot')),
+            'HOST': os.environ.get('MYSQL_HOST', default=env('MYSQL_HOST', default='mysql')),
+            'PORT': int(os.environ.get('MYSQL_PORT', default=env('MYSQL_PORT', default='3306'))),
+            'USER': os.environ.get('MYSQL_USER', default=env('MYSQL_USER', default='root')),
+            'PASSWORD': os.environ.get('MYSQL_PASSWORD', default=env('MYSQL_PASSWORD', default='password')),
+        }
+    }
 
 
 # Password validation
@@ -169,7 +177,7 @@ WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY', default=env('WEATHER_API_KEY
 OPEN_AI_API_KEY = os.environ.get('OPEN_AI_API_KEY', default=env('OPEN_AI_API_KEY'))
 
 # TENOR API
-TENOR_API_KEY = os.environ.get('TENOR_API_KEY', default=env('TENOR_API_KEY'))
+TENOR_API_KEY = os.environ.get('TENOR_API_KEY', default=env('TENOR_API_KEY', default=''))
 
 # GEMINI API
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', default=env('GEMINI_API_KEY'))
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', default=env('GEMINI_API_KEY', default=''))
