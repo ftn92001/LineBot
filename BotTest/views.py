@@ -131,11 +131,11 @@ def callback(request):
                             texts = [f"你的石頭不足，剩下{user.money}顆石頭"]
                         return HttpResponse()
                     elif text[:3] in ['!北捷', '！北捷']:
-                        imgs = ['https://web.metro.taipei/pages/assets/images/routemap2020.png']
+                        imgs = ['https://web.metro.taipei/pages/assets/images/routemap2024.png']
                     elif text[:3] in ['!中捷', '！中捷']:
                         imgs = ['https://www.tmrt.com.tw/static/img/metro-life/map/map.jpg']
                     elif text[:3] in ['!高捷', '！高捷']:
-                        imgs = ['https://www.krtc.com.tw/Content/userfiles/images/guide-map.jpg?v=c24_1']
+                        imgs = ['https://www.krtc.com.tw/Content/userfiles/images/guide-map.jpg']
                     elif text[:2] in ['!p', '！p', '!P', '！P']:
                         imgs = [get_image(text[2:])]
                     elif text[:3].lower() in ['!yt', '！yt']:
