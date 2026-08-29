@@ -29,7 +29,7 @@ def generate_content(content, image_content=None):
             {"role": "user", "parts": [{ "text": content }]}
         ]
 
-    model = "gemini-1.5-flash-latest"
+    model = "gemini-flash-lite-latest"
     response = requests.post(
         f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}',
         headers = {
