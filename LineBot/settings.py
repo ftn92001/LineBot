@@ -176,8 +176,8 @@ WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY', default=env('WEATHER_API_KEY
 # OpenAI API
 OPEN_AI_API_KEY = os.environ.get('OPEN_AI_API_KEY', default=env('OPEN_AI_API_KEY'))
 
-# TENOR API
-TENOR_API_KEY = os.environ.get('TENOR_API_KEY', default=env('TENOR_API_KEY', default=''))
+# GIPHY API
+GIPHY_API_KEY = os.environ.get('GIPHY_API_KEY', default=env('GIPHY_API_KEY', default=''))
 
 # GEMINI API
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', default=env('GEMINI_API_KEY', default=''))

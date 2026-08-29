@@ -22,7 +22,7 @@ from .services.whitecat_wiki import character_info_template_message
 from .services.line_bot import push_message, push_morning_messages
 from .services.gemini import generate_content
 from .services.anime import anime
-from .services.tenor import get_gif_imgs
+from .services.giphy import get_gif_imgs
 from .services.redis_service import RedisService
 from .models import LineUser, DailyAttendance
 
@@ -69,7 +69,7 @@ def callback(request):
                     print(source_group)
                     user = LineUser.objects.get_or_create(line_id = source_user, defaults={"line_id": source_user, "money": 0})[0]
                     if text[:3] in ['!指令', '！指令']:
-                        texts.append('!指令\n!白貓\n!天氣\n!簽到\n!石頭\n!抽女朋友\n!十連抽\n!北(中高)捷\n!p搜圖\n!yt搜影片\n!git\n@中英日韓翻譯\n!遊戲\n!抽\n!ai\n美日韓港人民幣換算\n!新番 xxxx年x季新番')
+                        texts.append('!指令\n!白貓\n!天氣\n!簽到\n!石頭\n!抽女朋友\n!十連抽\n!北(中高)捷\n!p搜圖\n!yt搜影片\n!gif\n@中英日韓翻譯\n!遊戲\n!抽\n!ai\n美日韓港人民幣換算\n!新番 xxxx年x季新番')
                     elif text[:3] in ['!新番', '！新番']:
                         query = text.split()[1]
                         line_bot_api.reply_message(event.reply_token, anime(query))

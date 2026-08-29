@@ -28,7 +28,7 @@ docker compose down         # 停止（資料保留在 volume）
 
 - **LINE_CHANNEL_ACCESS_TOKEN / LINE_CHANNEL_SECRET** — 必填（LINE Developers Console）
 - **MYSQL_ROOT_PASSWORD / MYSQL_DATABASE** — MySQL root 密碼 與 資料庫名（預設 LineBot），DBeaver 也用同一組密碼
-- `YOUTUBE_API_KEY` / `WEATHER_API_KEY` / `OPEN_AI_API_KEY` / `TENOR_API_KEY` / `GEMINI_API_KEY` — 選填，沒填該功能失效
+- `YOUTUBE_API_KEY` / `WEATHER_API_KEY` / `OPEN_AI_API_KEY` / `GIPHY_API_KEY` / `GEMINI_API_KEY` — 選填，沒填該功能失效
 - `RENDER_EXTERNAL_HOSTNAME` — settings 裡無 default 的 env，缺失時 app 無法啟動；本地需在 `.env` 提供（例如 `*`）
 
 所有從 `.env` 讀取的變數都在 `LineBot/settings.py`，用 `os.environ.get(..., default=env(...))` 讀取。
@@ -47,7 +47,7 @@ docker compose down         # 停止（資料保留在 volume）
 - `LineBot/` — Django 專案設定（`settings.py`、`urls.py`、`wsgi.py`）
 - `BotTest/views.py` — webhook `/callback` 與所有指令處理（`match message_type:`，文字指令用 `!指令` 前綴）
 - `BotTest/models.py` — 三張資料表
-- `BotTest/services/` — 各功能邏輯：`weather.py`、`gemini.py`、`open_ai.py`、`tenor.py`、`anime.py`、`ptt_beauty.py`、`whitecat_wiki.py`、`user_money.py`、`line_bot.py`、`redis_service.py`
+- `BotTest/services/` — 各功能邏輯：`weather.py`、`gemini.py`、`open_ai.py`、`giphy.py`、`anime.py`、`ptt_beauty.py`、`whitecat_wiki.py`、`user_money.py`、`line_bot.py`、`redis_service.py`
 - `BotTest/scripts/create_photos.py` — 抓 PTT Beauty 正妹圖灌入 `Photo`（用 `runscript create_photos`）
 
 ## 指令對照（views.py 內）
